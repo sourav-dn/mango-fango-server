@@ -47,8 +47,8 @@ client.connect()
                     res.status(500).json({ error: 'Failed to add plant', details: err.message });
                 });
         });
-        
-        // ✅ Get latest 6 plants (GET)
+
+        // Get latest 6 plants (GET)
         app.get('/newplants', async (req, res) => {
             try {
                 const plants = await plantsCollection.find().sort({ _id: -1 }).limit(6).toArray();
@@ -58,7 +58,7 @@ client.connect()
             }
         });
 
-        
+
         // ✅ Get All Plants
         app.get('/allplants', async (req, res) => {
             try {
@@ -68,8 +68,8 @@ client.connect()
                 res.status(500).json({ message: 'Failed to fetch all plants', error: err.message });
             }
         });
-        
-        // GET: Fetch all plants added by a specific user
+
+        // GET Fetch all plants added by a specific user
         app.get('/myplants', async (req, res) => {
             try {
                 const userEmail = req.query.email;
@@ -93,31 +93,31 @@ client.connect()
 
         app.put('/updateplant/:id', async (req, res) => {
             try {
-            const id = req.params.id;
-            const updatedPlant = req.body;
-            const result = await plantsCollection.updateOne(
-            { _id: new ObjectId(id) },
-            { $set: updatedPlant }
-        );
+                const id = req.params.id;
+                const updatedPlant = req.body;
+                const result = await plantsCollection.updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: updatedPlant }
+                );
 
-            if (result.modifiedCount > 0) {
-        res.status(200).send({ message: "Updated successfully" });
-        } else {
-        res.status(404).send({ error: "Plant not found or not modified" });
-        }
-        } catch (err) {
-            res.status(500).send({ error: 'Failed to update plant', details: err.message });
-        }
+                if (result.modifiedCount > 0) {
+                    res.status(200).send({ message: "Updated successfully" });
+                } else {
+                    res.status(404).send({ error: "Plant not found or not modified" });
+                }
+            } catch (err) {
+                res.status(500).send({ error: 'Failed to update plant', details: err.message });
+            }
         });
 
 
 
 
-            // ✅ Get Single Plant by ID
-            app.get('/plant/:id', async (req, res) => {
+        //  Get Single Plant by ID
+        app.get('/plant/:id', async (req, res) => {
             const id = req.params.id;
 
-            // ✅ Check if ID is valid ObjectId
+            //  Check if ID is valid ObjectId
             if (!ObjectId.isValid(id)) {
                 return res.status(400).json({ error: "Invalid ID format" });
             }
