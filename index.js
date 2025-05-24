@@ -25,116 +25,94 @@ const client = new MongoClient(uri, {
     },
 });
 
-client.connect()
-    .then(() => {
-        console.log("MongoDB connected");
-
-        const database = client.db("mangoGarden");
-        const plantsCollection = database.collection("plants");
-
-        // Add plant route
-        app.post('/addplant', (req, res) => {
-            const plant = req.body;
-            plantsCollection.insertOne(plant)
-                .then(result => {
-                    res.status(200).json({ message: 'Plant added successfully', insertedId: result.insertedId });
-                })
-                .catch(err => {
-                    res.status(500).json({ error: 'Failed to add plant', details: err.message });
-                });
-        });
-
-        // Get latest 6 plants (GET)
-        app.get('/newplants', async (req, res) => {
-            try {
-                const plants = await plantsCollection.find().sort({ _id: -1 }).limit(6).toArray();
-                res.status(200).json(plants);
-            } catch (err) {
-                res.status(500).json({ message: 'Failed to fetch plants', error: err.message });
-            }
-        });
+async function run() {
+    try {
+        // Connect the client to the server	(optional starting in v4.7)
+        // await client.connect();
+        // Send a ping to confirm a successful connection
+        // await client.db("admin").command({ ping: 1 });
+        const plantsCollection = client.db("mangoGarden").collection("plants");
 
 
-        // ✅ Get All Plants
+        // Get All Plants
         app.get('/allplants', async (req, res) => {
-            try {
-                const allPlants = await plantsCollection.find().toArray();
-                res.status(200).json(allPlants);
-            } catch (err) {
-                res.status(500).json({ message: 'Failed to fetch all plants', error: err.message });
-            }
+            const cursor = plantsCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+
+        app.post("/addplant", async (req, res) => {
+            const plant = req.body;
+            const result = await plantsCollection.insertOne(plant);
+            res.send(result);
         });
 
-        // GET Fetch all plants added by a specific user
+        // GET: Latest 6 Plants
+        app.get('/newplants', async (req, res) => {
+            const plants = await plantsCollection.find().sort({ _id: -1 }).limit(6).toArray();
+            res.status(200).json(plants);
+        });
+
+        //My plant
         app.get('/myplants', async (req, res) => {
-            try {
-                const userEmail = req.query.email;
-                const plants = await plantsCollection.find({ userEmail }).toArray();
-                res.status(200).json(plants);
-            } catch (err) {
-                res.status(500).json({ message: 'Failed to fetch user plants', error: err.message });
-            }
+            const email = req.query.email;
+            const userPlants = await plantsCollection.find({ userEmail: email }).toArray();
+            res.status(200).json(userPlants);
         });
 
-        // DELETE: Delete a plant
-        app.delete('/plant/:id', async (req, res) => {
-            try {
-                const id = req.params.id;
-                const result = await plantsCollection.deleteOne({ _id: new ObjectId(id) });
-                res.status(200).json(result);
-            } catch (err) {
-                res.status(500).json({ message: 'Failed to delete plant', error: err.message });
-            }
-        });
-
-        app.put('/updateplant/:id', async (req, res) => {
-            try {
-                const id = req.params.id;
-                const updatedPlant = req.body;
-                const result = await plantsCollection.updateOne(
-                    { _id: new ObjectId(id) },
-                    { $set: updatedPlant }
-                );
-
-                if (result.modifiedCount > 0) {
-                    res.status(200).send({ message: "Updated successfully" });
-                } else {
-                    res.status(404).send({ error: "Plant not found or not modified" });
-                }
-            } catch (err) {
-                res.status(500).send({ error: 'Failed to update plant', details: err.message });
-            }
-        });
-
-
-
-
-        //  Get Single Plant by ID
+        //get single plant by id
         app.get('/plant/:id', async (req, res) => {
             const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await plantsCollection.findOne(query);
+            res.send(result);
+        })
 
-            //  Check if ID is valid ObjectId
+        // update plant
+        app.put("/updateplant/:id", async (req, res) => {
+            const id = req.params.id;
+            const updatedPlant = req.body;
+            const result = await plantsCollection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: updatedPlant }
+            );
+            res.send(result);
+        });
+
+
+        //delete plant
+        app.delete('/plant/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await plantsCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // GET: Get Single Plant
+        app.get('/plant/:id', async (req, res) => {
+            const id = req.params.id;
             if (!ObjectId.isValid(id)) {
                 return res.status(400).json({ error: "Invalid ID format" });
             }
-
-            try {
-                const plant = await plantsCollection.findOne({ _id: new ObjectId(id) });
-
-                if (!plant) {
-                    return res.status(404).json({ error: "Plant not found" });
-                }
-
-                res.status(200).json(plant);
-            } catch (err) {
-                res.status(500).json({ error: 'Failed to fetch plant', details: err.message });
-            }
+            const plant = await plantsCollection.findOne({ _id: new ObjectId(id) });
+            if (!plant) return res.status(404).json({ error: "Plant not found" });
+            res.status(200).json(plant);
         });
-    })
-    .catch(err => {
-        console.error("MongoDB connection failed:", err);
-    });
+        
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    } finally {
+        // Ensures that the client will close when you finish/error
+        // await client.close();
+    }
+}
+run().catch(console.dir);
+
+
+app.get('/', (req, res) => {
+    res.send('mangofango server is running')
+})
 
 app.listen(port, () => {
-    console.log(`mango server is running on port: ${port}`);
+  console.log(`Mango server is running on port: ${port}`);
 });
