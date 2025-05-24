@@ -91,7 +91,14 @@ client.connect()
             }
         });
 
-        
+        app.put('/updateplant/:id', async (req, res) => {
+            try {
+            const id = req.params.id;
+            const updatedPlant = req.body;
+            const result = await plantsCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: updatedPlant }
+        );
 
 
 
