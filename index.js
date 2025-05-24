@@ -100,7 +100,15 @@ client.connect()
             { $set: updatedPlant }
         );
 
-
+            if (result.modifiedCount > 0) {
+        res.status(200).send({ message: "Updated successfully" });
+        } else {
+        res.status(404).send({ error: "Plant not found or not modified" });
+        }
+        } catch (err) {
+            res.status(500).send({ error: 'Failed to update plant', details: err.message });
+        }
+        });
 
 
 
