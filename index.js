@@ -48,7 +48,15 @@ client.connect()
                 });
         });
         
-
+        // ✅ Get latest 6 plants (GET)
+        app.get('/newplants', async (req, res) => {
+            try {
+                const plants = await plantsCollection.find().sort({ _id: -1 }).limit(6).toArray();
+                res.status(200).json(plants);
+            } catch (err) {
+                res.status(500).json({ message: 'Failed to fetch plants', error: err.message });
+            }
+        });
 
         
 
