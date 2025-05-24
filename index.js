@@ -99,7 +99,7 @@ async function run() {
             if (!plant) return res.status(404).json({ error: "Plant not found" });
             res.status(200).json(plant);
         });
-        
+
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
@@ -107,11 +107,6 @@ async function run() {
     }
 }
 run().catch(console.dir);
-
-
-app.get('/', (req, res) => {
-    res.send('mangofango server is running')
-})
 
 app.listen(port, () => {
   console.log(`Mango server is running on port: ${port}`);
