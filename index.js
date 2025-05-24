@@ -69,7 +69,16 @@ client.connect()
             }
         });
         
-
+        // GET: Fetch all plants added by a specific user
+        app.get('/myplants', async (req, res) => {
+            try {
+                const userEmail = req.query.email;
+                const plants = await plantsCollection.find({ userEmail }).toArray();
+                res.status(200).json(plants);
+            } catch (err) {
+                res.status(500).json({ message: 'Failed to fetch user plants', error: err.message });
+            }
+        });
 
 
 
