@@ -59,7 +59,15 @@ client.connect()
         });
 
         
-
+        // ✅ Get All Plants
+        app.get('/allplants', async (req, res) => {
+            try {
+                const allPlants = await plantsCollection.find().toArray();
+                res.status(200).json(allPlants);
+            } catch (err) {
+                res.status(500).json({ message: 'Failed to fetch all plants', error: err.message });
+            }
+        });
         
 
 
