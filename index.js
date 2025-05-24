@@ -36,7 +36,17 @@ client.connect()
         const database = client.db("mangoGarden");
         const plantsCollection = database.collection("plants");
 
-
+        // Add plant route
+        app.post('/addplant', (req, res) => {
+            const plant = req.body;
+            plantsCollection.insertOne(plant)
+                .then(result => {
+                    res.status(200).json({ message: 'Plant added successfully', insertedId: result.insertedId });
+                })
+                .catch(err => {
+                    res.status(500).json({ error: 'Failed to add plant', details: err.message });
+                });
+        });
         
 
 
