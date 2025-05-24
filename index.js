@@ -80,7 +80,16 @@ client.connect()
             }
         });
 
-
+        // DELETE: Delete a plant
+        app.delete('/plant/:id', async (req, res) => {
+            try {
+                const id = req.params.id;
+                const result = await plantsCollection.deleteOne({ _id: new ObjectId(id) });
+                res.status(200).json(result);
+            } catch (err) {
+                res.status(500).json({ message: 'Failed to delete plant', error: err.message });
+            }
+        });
 
         
 
