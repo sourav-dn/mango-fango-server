@@ -51,14 +51,14 @@ async function run() {
         // GET: Latest 6 Plants
         app.get('/newplants', async (req, res) => {
             const plants = await plantsCollection.find().sort({ _id: -1 }).limit(6).toArray();
-            res.status(200).json(plants);
+            res.send(plants);
         });
 
         //My plant
         app.get('/myplants', async (req, res) => {
             const email = req.query.email;
             const userPlants = await plantsCollection.find({ userEmail: email }).toArray();
-            res.status(200).json(userPlants);
+            res.send(userPlants);
         });
 
         //get single plant by id
@@ -93,11 +93,13 @@ async function run() {
         app.get('/plant/:id', async (req, res) => {
             const id = req.params.id;
             if (!ObjectId.isValid(id)) {
-                return res.status(400).json({ error: "Invalid ID format" });
+                return res.send({ error: "Invalid ID format" });
             }
             const plant = await plantsCollection.findOne({ _id: new ObjectId(id) });
-            if (!plant) return res.status(404).json({ error: "Plant not found" });
-            res.status(200).json(plant);
+            if (!plant) {
+                return res.send({ error: "Plant not found" });
+            }
+            res.send(plant);
         });
 
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
