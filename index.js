@@ -88,6 +88,14 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/stats', (req, res) => {
+            // Example data
+            res.json({
+                totalPlants: 100,
+                myPlants: 25,
+            });
+        });
+
         // GET: Get Single Plant
         app.get('/plant/:id', async (req, res) => {
             const id = req.params.id;
@@ -110,5 +118,5 @@ async function run() {
 run().catch(console.dir);
 
 app.listen(port, () => {
-  console.log(`Mango server is running on port: ${port}`);
+    console.log(`Mango server is running on port: ${port}`);
 });
